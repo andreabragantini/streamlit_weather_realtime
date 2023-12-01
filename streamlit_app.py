@@ -7,6 +7,7 @@ import seaborn as sns
 sns.set()
 from datetime import datetime
 from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 from PIL import Image       # this package is used to put images within streamlit
 # Standard plotly imports
 import plotly
@@ -36,12 +37,17 @@ headers = {
 # Function to geocode location to latitude and longitude
 def geocode_location(location):
 
-    geolocator = Nominatim(user_agent="WeatherApp (andrea.bragantini@upc.edu)")
+    #nominatim_service = Nominatim(user_agent="andrea.bragantini@upc.edu")
+    #geolocator = RateLimiter(nominatim_service.geocode, min_delay_seconds=1)
+    geolocator = Nominatim(user_agent="andrea.bragantini@upc.edu")
     location_info = geolocator.geocode(location)
-    if location_info:
-        return location_info.latitude, location_info.longitude
-    else:
-        return None
+
+    return location_info
+
+    #if location_info:
+    #    return location_info.latitude, location_info.longitude
+    #else:
+    #    return None
 
 #%% Web app design
 
@@ -49,10 +55,14 @@ def geocode_location(location):
 st.title("Real-time Weather App")
 
 # User input
-location = st.text_input("Enter Location:", "City, Country")
+location = st.text_input("Enter Location:", "Barcelona, Spain")
 # geocode the location
 coords = geocode_location(location)
+#coords = str(lat) + "," + str(lon)
 #coords = '53.1,-0.13'
+
+#print(lat, lon)
+st.write(coords)
 
 # fun to make request
 def get_weather_data(location):
@@ -71,7 +81,7 @@ def get_weather_data(location):
 
     return data
 
-# if input is succesful
+# if input is successful
 if coords:
 
     st.write("Latitude:", coords[0], "Longitude:", coords[1])
