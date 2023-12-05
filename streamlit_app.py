@@ -10,12 +10,17 @@ import plotly
 import plotly.graph_objs as go
 from plotly.offline import iplot, init_notebook_mode
 import plotly.figure_factory as ff
-from plotting_funs import plot_weather_data, plot_weather_data_plotly
+from plotting_funs import plot_weather_data_plotly
 from geoloc_api import get_lat_long_opencage
 from weather_api import get_weather_data
 
 # Page setting
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="Real-Time Weather Data Dashboard",
+    page_icon="✅",
+    layout="wide",
+)
+
 # Disable warning on st.pyplot (the config option: deprecation.showPyplotGlobalUse)
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -25,112 +30,145 @@ with open('style.css') as f:
 
 #%% Web app design
 
-# title
+# Title
 st.title("Real-time Weather App")
 
 # User input
 location = st.text_input("Enter Location:", "Barcelona, Spain")
-# geocode the location
+
+# Geocode the location
 lat, lon = get_lat_long_opencage(location)
 coords = str(lat) + "," + str(lon)
+
+# Create a placeholder for the weather info
+weather_placeholder = st.empty()
+
+# Structures to store historic data
+timestamps, temperatures, humidities = [], [], []
 
 # if input is successful
 if coords:
 
-    st.write("Latitude:", lat, "Longitude:", lon)
-
-    timestamps, temperatures, humidities = [], [], []
-
-    # Create a placeholder for the plot
-    plot_placeholder = st.empty()
-
-    # real-time operations
     while True:
+
         # get data with get request
         weather_data = get_weather_data(location)
+
+        #####################################################################################
+        ### Create an historic of weather data to be plotted
+        #####################################################################################
 
         # Extract data from the API response
         timestamp = datetime.strptime(weather_data["location"]["localtime"], "%Y-%m-%d %H:%M")
         temperature = weather_data["current"]["temp_c"]
         humidity = weather_data["current"]["humidity"]
 
-        # create an historic of weather data to be plotted
         # Append data to lists
-        #timestamps.append(timestamp)
-        #temperatures.append(temperature)
-        #humidities.append(humidity)
-
-        # crate the plot
-        #fig = plot_weather_data(timestamps, temperatures, humidities)
-        #fig = plot_weather_data_plotly(timestamps, temperatures, humidities)
-
-        # display the plot
-        #st.pyplot(fig)
+        timestamps.append(timestamp)
+        temperatures.append(temperature)
+        humidities.append(humidity)
 
 
-        # Display weather data
-        #st.header(f"Weather in {weather_data['location']['name']}, {weather_data['location']['country']}")
-        st.subheader(f"As of {weather_data['location']['localtime']}")
+        #####################################################################################
+        ### Display weather data
+        #####################################################################################
 
-        # Set background color based on temperature
-        if weather_data['current']['temp_c'] > 25:
-            st.markdown('<style>body{background-color: #FFD700;}</style>', unsafe_allow_html=True)  # Warm color
-        else:
-            st.markdown('<style>body{background-color: #87CEEB;}</style>', unsafe_allow_html=True)  # Cool color
+        with weather_placeholder.container():
 
-        # Weather icons
-        condition_icon = weather_data['current']['condition']['icon']
-        st.image(f"https:{condition_icon}", width=100)
+            #st.header(f"Weather in {weather_data['location']['name']}, {weather_data['location']['country']}")
 
-        # 1st ROW - Principal Weather data
-        a1, a2, a3, a4 = st.columns(4)
-        a1.metric("Temperature (°C)", f"{weather_data['current']['temp_c']}°C")
-        a2.metric("Feels Like (°C)", f"{weather_data['current']['feelslike_c']}°C")
-        a3.metric("Humidity (%)", f"{weather_data['current']['humidity']}%")
-        a4.metric("Wind (km/h)", f"{weather_data['current']['wind_kph']} km/h")
+            # Set background color based on temperature
+            background_color = '#FFD700' if weather_data['current']['temp_c'] > 0 else '#87CEEB'
+            st.markdown(f'<style>body{{background-color: {background_color}; margin: 0; padding: 0;}}</style>',
+                        unsafe_allow_html=True)
 
-        # 2nd ROW - Additional Weather data
-        b1, b2, b3 = st.columns(3)
-        with b1:
-            st.subheader("Current Weather")
-            st.write(f"Temperature: {weather_data['current']['temp_c']}°C ({weather_data['current']['temp_f']}°F)")
-            st.write(f"Condition: {weather_data['current']['condition']['text']}")
-            st.write(f"Humidity: {weather_data['current']['humidity']}%")
-            st.write(f"Wind: {weather_data['current']['wind_kph']} km/h, {weather_data['current']['wind_dir']}")
-            st.write(f"Pressure: {weather_data['current']['pressure_mb']} mb")
-            st.write(f"Cloudiness: {weather_data['current']['cloud']}%")
+            localtime = weather_data['location']['localtime']
+            localtime = datetime.strptime(localtime, "%Y-%m-%d %H:%M")
 
-        with b2:
-            st.subheader("Additional Information")
-            st.write(
-                f"Feels Like: {weather_data['current']['feelslike_c']}°C ({weather_data['current']['feelslike_f']}°F)")
-            st.write(
-                f"Visibility: {weather_data['current']['vis_km']} km ({weather_data['current']['vis_miles']} miles)")
-            st.write(f"UV Index: {weather_data['current']['uv']}")
-            st.write(f"Gust Speed: {weather_data['current']['gust_kph']} km/h")
+            condition = weather_data["current"]["condition"]["text"]
+            condition_icon = weather_data['current']['condition']['icon']
 
-        with b3:
-            st.subheader("Last Updated")
-            st.write(f"Local Time: {weather_data['location']['localtime']}")
-            st.write(f"API Last Updated: {weather_data['current']['last_updated']}")
+            # Display time information on the left
+            st.subheader(f'**Time:** {localtime}')
+
+            # Display condition info with icon on the right
+            st.markdown(f'**{condition}**')
+            st.image(f"https:{condition_icon}", width=100)
+
+            #####################################################################################
+            # 1st ROW - Principal Weather data
+            a1, a2, a3, a4 = st.columns(4)
+            a1.metric("Temperature (°C)", f"{weather_data['current']['temp_c']}°C")
+            a2.metric("Feels Like (°C)", f"{weather_data['current']['feelslike_c']}°C")
+            a3.metric("Humidity (%)", f"{weather_data['current']['humidity']}%")
+            a4.metric("Wind (km/h)", f"{weather_data['current']['wind_kph']} km/h")
+
+            #####################################################################################
+            # 2nd ROW - Additional Weather data
+            b1, b2, b3, b4 = st.columns(4)
+            with b1:
+                st.subheader("Additional Weather Data")
+                st.write(f"Temperature °F: {weather_data['current']['temp_f']}°F")
+                st.write(f"Pressure: {weather_data['current']['pressure_mb']} mb")
+                st.write(f"Cloudiness: {weather_data['current']['cloud']}%")
+                st.write(
+                    f"Visibility: {weather_data['current']['vis_km']} km ({weather_data['current']['vis_miles']} miles)")
+                st.write(f"UV Index: {weather_data['current']['uv']}")
+
+            with b2:
+                st.subheader("Wind Data")
+                st.write(f"Wind Speed: {weather_data['current']['wind_kph']} km/h")
+                st.write(f"Wind Direction: {weather_data['current']['wind_dir']}")
+                st.write(f"Gust Speed: {weather_data['current']['gust_kph']} km/h")
+                st.write(f"Gust Speed: {weather_data['current']['gust_mph']} mph")
 
 
-        # Additional information
-        with st.expander("More Information"):
-            st.subheader("Current Weather")
-            st.write(f"Condition: {weather_data['current']['condition']['text']}")
-            st.write(f"Wind Direction: {weather_data['current']['wind_dir']}")
-            st.write(f"Pressure: {weather_data['current']['pressure_mb']} mb")
+            with b3:
+                st.subheader("Additional Information")
+                st.write("Latitude:", lat, "Longitude:", lon)
+                st.write("Country:", weather_data['location']['country'])
+                st.write("Region:", weather_data['location']['region'])
+                st.write("Timezone:", weather_data['location']['tz_id'])
 
-        # Map
-        map_data = pd.DataFrame({
-            'lat': [weather_data['location']['lat']],
-            'lon': [weather_data['location']['lon']],
-        })
-        st.map(map_data, zoom=10)
+            with b4:
+                st.subheader("Last Updated")
+                st.write(f"Local Time: {weather_data['location']['localtime']}")
+                st.write(f"API Last Updated: {weather_data['current']['last_updated']}")
 
-        # Wait for a specified time before making the next request
-        time.sleep(61)
+            #####################################################################################
+            # 2rd ROW - Map and Historic Data
+            c1, c2 = st.columns(2)
+
+            # Map
+            map_data = pd.DataFrame({
+                'lat': [weather_data['location']['lat']],
+                'lon': [weather_data['location']['lon']],
+            })
+
+            with c1:
+                st.map(map_data, zoom=10)
+
+            with c2:
+
+                # crate the plot
+                #fig = plot_weather_data(timestamps, temperatures, humidities)
+                fig = plot_weather_data_plotly(timestamps, temperatures, humidities)
+
+                # display the plot
+                st.plotly_chart(fig)
+
+            # Additional information
+            with st.expander("More Information"):
+                st.subheader("Current Weather")
+                st.write(f"Condition: {weather_data['current']['condition']['text']}")
+                st.write(f"Wind Direction: {weather_data['current']['wind_dir']}")
+                st.write(f"Pressure: {weather_data['current']['pressure_mb']} mb")
+
+
+            st.write(timestamps)
+
+            # Wait for a specified time before making the next request
+            time.sleep(2)
 
 else:
     st.write("Invalid location. Please enter a valid location.")
