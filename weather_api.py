@@ -3,6 +3,7 @@ Script to test the Weather API
 Contains the function used in the main script to stream weather data
 """
 import requests
+import streamlit as st
 
 # define the API endpoint
 API_URL = "https://weatherapi-com.p.rapidapi.com"
@@ -15,6 +16,7 @@ headers = {
 }
 
 # fun to make request
+@st.experimental_memo
 def get_weather_data(coords):
 
     # create params dict
