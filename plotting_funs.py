@@ -4,7 +4,7 @@ import streamlit as st
 # NB: to create plot to be displayed, it seems that you must not use return fig
 
 # Function to plot data using Plotly
-@st.experimental_memo
+@st.cache_data
 def plot_weather_data_plotly(timestamps, temperatures, humidities):
     # Create a figure with subplots
     fig = go.Figure()
