@@ -66,7 +66,7 @@ if coords:
         #st.header(f"Weather in {weather_data['location']['name']}, {weather_data['location']['country']}")
 
         # Set background color based on temperature
-        background_color = '#FFD700' if weather_data['current']['temp_c'] > 0 else '#87CEEB'
+        background_color = '#FFD700' if weather_data['current']['temp_c'] > 10 else '#87CEEB'
         st.markdown(f'<style>body{{background-color: {background_color}; margin: 0; padding: 0;}}</style>',
                     unsafe_allow_html=True)
 
@@ -76,12 +76,20 @@ if coords:
         condition = weather_data["current"]["condition"]["text"]
         condition_icon = weather_data['current']['condition']['icon']
 
-        # Display time information on the left
-        st.subheader(f'**Time:** {localtime}')
+        # container for time, condition and icon
+        with st.container(border=True):
 
-        # Display condition info with icon on the right
-        st.markdown(f'**{condition}**')
-        st.image(f"https:{condition_icon}", width=100)
+            time_col, condition_col, icon_col = st.columns([3, 1, 1])
+
+            # Display time information on the left
+            time_col.subheader(f'{localtime}')
+
+            # Display condition info with icon on the right
+            condition_col.metric("Condition:", f"{condition}")
+
+            # Display condition info with icon on the right
+            icon_col.image(f"https:{condition_icon}", width=100)
+
 
         #####################################################################################
         # 1st ROW - Principal Weather data
@@ -90,6 +98,9 @@ if coords:
         a2.metric("Feels Like (°C)", f"{weather_data['current']['feelslike_c']}°C")
         a3.metric("Humidity (%)", f"{weather_data['current']['humidity']}%")
         a4.metric("Wind (km/h)", f"{weather_data['current']['wind_kph']} km/h")
+
+        # put a separator
+        st.markdown("""---""")
 
         #####################################################################################
         # 2nd ROW - Additional Weather data
@@ -123,6 +134,9 @@ if coords:
             st.write(f"Local Time: {weather_data['location']['localtime']}")
             st.write(f"API Last Updated: {weather_data['current']['last_updated']}")
 
+        # put a separator
+        st.markdown("""---""")
+
         #####################################################################################
         ### Create an historic of weather data to be plotted
         #####################################################################################
@@ -151,6 +165,10 @@ if coords:
             # display the plot
             st.plotly_chart(fig)
 
+        # put a separator
+        st.markdown("""---""")
+
+        #####################################################################################
         # Additional information
         with st.expander("More Information"):
             st.subheader("Current Weather")
