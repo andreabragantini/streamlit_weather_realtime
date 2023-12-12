@@ -1,6 +1,6 @@
 """
 Script to test the Weather API
-Contains the function used in the main script to stream weather data
+Contains the function used in the main script to stream CURRENT weather data
 """
 import requests
 import streamlit as st
