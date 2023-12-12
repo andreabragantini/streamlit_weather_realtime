@@ -75,7 +75,7 @@ if coords:
         condition_icon = weather_data['current']['condition']['icon']
 
         # container for time, condition and icon
-        with st.container(border=True):
+        with st.container():
 
             time_col, condition_col, icon_col = st.columns([3, 1, 1])
 
