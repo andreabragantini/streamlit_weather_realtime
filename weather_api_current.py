@@ -16,7 +16,7 @@ headers = {
 }
 
 # fun to make request
-@st.cache_data
+@st.cache
 def get_weather_data(coords):
 
     # create params dict

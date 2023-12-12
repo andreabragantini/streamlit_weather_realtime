@@ -18,7 +18,7 @@ headers = {
 }
 
 # fun to make request
-@st.cache_data
+@st.cache
 def get_historical_weather_data(coords):
 
     # get current time
