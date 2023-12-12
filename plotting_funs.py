@@ -20,7 +20,7 @@ def plot_weather_data_plotly(timestamps, temperatures, humidities):
         xaxis=dict(title='Timestamp'),
         yaxis=dict(title='Temperature (°C)'),
         yaxis2=dict(title='Humidity (%)', overlaying='y', side='right'),
-        title='Weather Data Visualization',
+        title='Weather Data Visualization for the last 7 days',
         showlegend=True
     )
 

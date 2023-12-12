@@ -12,7 +12,8 @@ from plotly.offline import iplot, init_notebook_mode
 import plotly.figure_factory as ff
 from plotting_funs import plot_weather_data_plotly
 from geoloc_api import get_lat_long_opencage
-from weather_api import get_weather_data
+from weather_api_current import get_weather_data
+from weather_api_hist import get_historical_weather_data
 
 # Page setting
 st.set_page_config(
@@ -42,9 +43,6 @@ coords = str(lat) + "," + str(lon)
 
 # Create a placeholder for the weather info
 weather_placeholder = st.empty()
-
-# Structures to store historic data
-timestamps, temperatures, humidities = [], [], []
 
 # if input is successful
 if coords:
@@ -140,13 +138,27 @@ if coords:
         #####################################################################################
         ### Create an historic of weather data to be plotted
         #####################################################################################
-        ''' find a way to make different api calls every t time and store the data in a dataframe
-        to be later plotted real time in a chart'''
 
+        # Structures to store historic data to be plotted
+        timestamps, temperatures, humidities = [], [], []
+
+        # get historical weather of the previous 7 days
+        historic_weather_data = get_historical_weather_data(coords)
+
+        # Extract data from the API response
+        for day in historic_weather_data['forecast']['forecastday']:
+            for hour in day['hour']:
+                timestamps.append(hour['time'])
+                temperatures.append(hour['temp_c'])
+                humidities.append(hour['humidity'])
+
+        # other app design idea:
+        # find a way to make different api calls every t time and store the data in a dataframe
+        # to be later plotted real time in a chart'''
 
         #####################################################################################
         # 3rd ROW - Map and Historic Data
-        c1, c2 = st.columns(2)
+        c1, c2 = st.columns(2, gap='large')
 
         # Map
         map_data = pd.DataFrame({
@@ -157,6 +169,7 @@ if coords:
         with c1:
             st.map(map_data, zoom=10)
 
+        # Historic Data Plot
         with c2:
 
             # crate the plot
@@ -171,10 +184,17 @@ if coords:
         #####################################################################################
         # Additional information
         with st.expander("More Information"):
-            st.subheader("Current Weather")
-            st.write(f"Condition: {weather_data['current']['condition']['text']}")
-            st.write(f"Wind Direction: {weather_data['current']['wind_dir']}")
-            st.write(f"Pressure: {weather_data['current']['pressure_mb']} mb")
+            st.write("Historical weather data are available for the previous 7 days only with the free API plan")
+            st.write("Real-time weather data are available every 15 mins with the free API plan")
+            st.write("Weather data provided by [WeatherAPI.com](https://www.weatherapi.com/)")
+            st.write("Geocoding data provided by [OpenCage](https://opencagedata.com/)")
+            st.write("Map tiles by [OpenStreetMap](https://www.openstreetmap.org/)")
+            st.write("Plot created with [Plotly](https://plotly.com/)")
+            st.write("App created with [Streamlit](https://streamlit.io/)")
+            st.write("Hosting service provided by [Streamlit](https://streamlit.io/)")
+            st.write("Source code available on [GitHub](https://github.com/andreabragantini/streamlit_weather_realtime)")
+            st.write("If you like this app, please consider giving it a ⭐ on GitHub.")
+            st.write("Created by [Andrea Bragantini](https://www.linkedin.com/in/andrea-bragantini-693b50136/)")
 
         # Wait for a specified time before making the next request
         time.sleep(2)
