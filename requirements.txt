@@ -1,4 +1,5 @@
 streamlit==1.15.1
+altair==4.2.0
 pandas
 plost
 requests
