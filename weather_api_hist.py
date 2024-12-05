@@ -8,14 +8,17 @@ import streamlit as st
 from datetime import datetime, timedelta
 
 # define the API endpoint
-API_URL = "https://weatherapi-com.p.rapidapi.com"
+#API_URL = "https://weatherapi-com.p.rapidapi.com"
+#archive = "/history.json"
+API_URL = "http://api.weatherapi.com/v1"
 archive = "/history.json"
 
 # headers
-headers = {
-	"X-RapidAPI-Key": "6a425b2a7bmshc1f059e65b98fb7p1cdd78jsn184965114ca2",
-	"X-RapidAPI-Host": "weatherapi-com.p.rapidapi.com"
-}
+#headers = {
+#	"X-RapidAPI-Key": "6a425b2a7bmshc1f059e65b98fb7p1cdd78jsn184965114ca2",
+#	"X-RapidAPI-Host": "weatherapi-com.p.rapidapi.com"
+#}
+headers = {"key": "05f7b66047f544e18e6111653240512"}
 
 # fun to make request
 @st.cache
