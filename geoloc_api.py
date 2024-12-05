@@ -5,7 +5,7 @@ Contains the function used in the main script to geolocate a location
 from opencage.geocoder import OpenCageGeocode
 
 
-opencage_api_key = "578b62458e444260932de76467fa0872" # my key
+opencage_api_key = "cd5b178afc3446e8954e5ee083ff7759"   # my key
 
 
 
