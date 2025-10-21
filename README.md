@@ -17,4 +17,7 @@ Images and other media, like data are located in the same directory in the dedic
 
 `css` files are used for web development and contains information about the style (margins, colors, etc). Edit at your own risk.
 
-The `.streamlit` directory contains a file storing **theme settings** for streamlit, which is quite easy to edit to change the aspect of the web app.
+The `.streamlit` directory contains a file storing **theme settings** for streamlit, which is quite easy to edit to change the aspect of the web app.  
+
+This application is hosted on GitHub and deployed via Streamlit Community Cloud. You can access it here: [Weather Realtime App](https://weatherrealtime.streamlit.app/).
+*Note: The app may enter a sleep state after periods of inactivity and could take a few moments to wake up when first accessed.*
