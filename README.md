@@ -21,3 +21,4 @@ The `.streamlit` directory contains a file storing **theme settings** for stream
 
 This application is hosted on GitHub and deployed via Streamlit Community Cloud. You can access it here: [Weather Realtime App](https://weatherrealtime.streamlit.app/).
 *Note: The app may enter a sleep state after periods of inactivity and could take a few moments to wake up when first accessed.*
+*Note: If you’re running on Streamlit Community Cloud, secrets.toml file is ignored, you must add the secret in the app’s Settings → Secrets on streamlit.*
