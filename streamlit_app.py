@@ -11,7 +11,7 @@ import plotly.graph_objs as go
 from plotly.offline import iplot, init_notebook_mode
 import plotly.figure_factory as ff
 from plotting_funs import plot_weather_data_plotly
-from geoloc_api import get_lat_long_opencage
+from geoloc_api import get_lat_long_opencage, APIAuthError
 from weather_api_current import get_weather_data
 from weather_api_hist import get_historical_weather_data
 
@@ -38,8 +38,23 @@ st.title("Real-time Weather App")
 location = st.text_input("Enter Location:", "Barcelona, Spain")
 
 # Geocode the location
-lat, lon = get_lat_long_opencage(location)
-coords = str(lat) + "," + str(lon)
+if location:
+    with st.spinner("Geocoding…"):
+        try:
+            result = get_lat_long_opencage(location)
+
+            if result is None:
+                st.warning("Something went wrong in retrieving the location.")
+                st.stop()
+
+            lat, lon = result  # safe to unpack now
+            coords = str(lat) + "," + str(lon)
+
+        except APIAuthError as e:
+            st.error(str(e))
+            st.caption("Tip: The API key might be expired or updated. Check OPENCAGE_API_KEY to .streamlit/secrets.toml and restart the app.")
+            st.stop()  # prevents the rest of the app from running
+
 
 # Create a placeholder for the weather info
 weather_placeholder = st.empty()

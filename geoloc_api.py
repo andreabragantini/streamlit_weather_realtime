@@ -2,20 +2,33 @@
 Script to test the OpenCage Geocoder API
 Contains the function used in the main script to geolocate a location
 """
+import os
+import streamlit as st
 from opencage.geocoder import OpenCageGeocode
 
+# Define the custom exception for missing API key
+class APIAuthError(Exception): ...
 
-opencage_api_key = "cd5b178afc3446e8954e5ee083ff7759"   # my key
+# NB: The OpenCage API key is now stored in .streamlit/secrets.toml, and must be retrieved
+def get_api_key() -> str:
+    # Prefer Streamlit secrets, fall back to env var
+    key = st.secrets.get("OPENCAGE_API_KEY", None) or os.getenv("OPENCAGE_API_KEY")
+    if not key:
+        raise APIAuthError(
+            "Missing OpenCage API key. Add OPENCAGE_API_KEY to .streamlit/secrets.toml "
+            "or set the OPENCAGE_API_KEY environment variable."
+        )
+    return key
 
-
-
+# There might be problems with the API key if not used for long time, therefore need proper error handling
 def get_lat_long_opencage(city_name):
 
     try:
+        opencage_api_key = get_api_key()
         OCG = OpenCageGeocode(opencage_api_key)
         data = OCG.geocode(city_name)
 
-        if data[0]:
+        if data and data[0]:
             location = data[0]['formatted']
             print(f"Found coordinates for {city_name}: {location}")
             latitude, longitude = data[0]['geometry']['lat'], data[0]['geometry']['lng']
@@ -25,17 +38,18 @@ def get_lat_long_opencage(city_name):
             return None
 
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+        # Let the caller decide how to show this
+        raise APIAuthError(f"An error occurred: {e}") from e
 
-# Example usage:
+
+######################################################################################
+#%% Test the API
 if __name__ == "__main__":
 
-    ######################################################################################
-    # test the API
+    # Example usage:
+    opencage_api_key = get_api_key()
     OCG = OpenCageGeocode(opencage_api_key)
 
-    # example
     results = OCG.geocode(u'athens')
     print(u'%f;%f;%s;%s' % (results[0]['geometry']['lat'],
                             results[0]['geometry']['lng'],
